@@ -122,6 +122,15 @@ in
     };
   };
 
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+
+    # optional
+    enableZshIntegration = true;
+    enableBashIntegration = true;
+  };
+  
   # ---- SSH ----
   programs.ssh = {
     enable = true;
