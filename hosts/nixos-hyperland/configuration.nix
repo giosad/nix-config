@@ -48,12 +48,13 @@
   };
 
   # Enable the X11 windowing system.
-  services.xserver.enable = true;
+  # services.xserver.enable = true;
 
-  # Enable the Budgie Desktop environment.
-  services.xserver.displayManager.lightdm.enable = true;
-  services.xserver.desktopManager.budgie.enable = true;
-
+  # # Enable the Budgie Desktop environment.
+  # services.xserver.displayManager.lightdm.enable = true;
+  # services.xserver.desktopManager.budgie.enable = true;
+  services.displayManager.sddm.enable = true;
+  services.displayManager.sddm.wayland.enable = true;
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "ru";
@@ -113,8 +114,18 @@
     ghostty
     tree
     neofetch
+    foot
+    kitty
+    hyprpaper
+    waybar
   ];
 
+  
+  services.getty.autologinUser = "gena";
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+  };
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

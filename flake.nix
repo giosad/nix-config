@@ -72,6 +72,21 @@
             };
           }
         ];
+      };  
+
+      nixos-hyperland = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux"; 
+        modules = [
+          ./hosts/nixos-hyperland/hardware-configuration.nix
+          ./hosts/nixos-hyperland/configuration.nix
+          home-manager.nixosModules.home-manager
+         {
+           home-manager.users.gena = import ./home/gena.nix;
+           home-manager.backupFileExtension = "hm-bak";
+           home-manager.useGlobalPkgs = true;
+           home-manager.useUserPackages = true;
+         }
+        ];
       };
     };
   };
