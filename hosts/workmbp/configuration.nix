@@ -39,19 +39,22 @@
       NSStatusItemSelectionPadding = 8;
     };
   
-  dock = {
-    autohide = true;
-    show-recents = false;
-    tilesize = 48;
-  };
+    dock = {
+      autohide = true;
+      show-recents = false;
+      tilesize = 48;
+    };
   
-  finder = {
-     AppleShowAllExtensions = true;
-       ShowPathbar = true;
-       FXEnableExtensionChangeWarning = false;
-   };
+    finder = {
+      AppleShowAllExtensions = true;
+      ShowPathbar = true;
+      FXEnableExtensionChangeWarning = false;
+    };
   };
 
+  # Karabiner Elements: config managed by home-manager, app installed manually
+  # (SentinelOne blocks nix-managed installation)
+  
   # Disable PAM management (SIP prevents modifying /etc/pam.d/)
   security.pam.services.sudo_local.enable = false;
   # do it yourself with

@@ -169,6 +169,11 @@ in
     };
   };
 
+  programs.gh = {
+    enable = true;
+    gitCredentialHelper.enable = true;
+  };
+
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
@@ -187,7 +192,11 @@ in
   # ---- Keep ~ tidy by storing configs in .config ----
   xdg = {
     enable = true;
-    configFile."p10k/p10k.zsh".source = ./p10k.zsh;
+    configFile = {
+      "p10k/p10k.zsh".source = ./p10k.zsh;
+    } // lib.optionalAttrs isDarwin {
+      "karabiner/karabiner.json".source = ./karabiner.json;
+    };
   };
 
   # ---- macOS-only scripts ----
