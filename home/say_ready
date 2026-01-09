@@ -1,0 +1,27 @@
+#!/bin/zsh
+
+ts_file="${HOME}/.last_say_ready_time"
+now=$(date +%s)
+last=0
+
+# Get the interval (in seconds) from the first argument, default to 0 (always run)
+interval="${1:-0}"
+
+[[ -f "$ts_file" ]] && last=$(<"$ts_file")
+
+if (( interval == 0 || now - last >= interval )); then
+  echo "$now" > "$ts_file"
+  say -v Zarvox -r 200 "$(shuf -n 1 -e \
+    "Job\'s done" \
+    "Work complete\!" \
+    "Ready to work." \
+    "Job\'s done" \
+    "Work work." \
+    "More work?" \
+    "Righto\!" \
+    "Zug zug." \
+    "Go ahead, commander.")" &
+else
+  afplay /System/Library/Sounds/Pop.aiff &
+fi
+

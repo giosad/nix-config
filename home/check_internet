@@ -1,0 +1,257 @@
+#!/usr/bin/env python3
+"""
+Internet connection quality monitor for macOS.
+
+Continuously monitors internet connection quality by pinging DNS servers
+with minimal network traffic usage (similar to ping -i 5 -c 1000 8.8.8.8).
+"""
+
+import subprocess
+import time
+import signal
+import sys
+import statistics
+from datetime import datetime
+from typing import NamedTuple
+
+
+class PingResult(NamedTuple):
+    """Result of a single ping operation."""
+    success: bool
+    latency: float | None
+    timestamp: datetime
+
+
+class ConnectionMonitor:
+    """Monitor internet connection quality with continuous ping tests."""
+    
+    def __init__(self, host: str = "8.8.8.8", interval: int = 5):
+        """
+        Initialize connection monitor.
+        
+        Args:
+            host: target host to ping (default: Google DNS)
+            interval: seconds between ping attempts
+        """
+        self.host = host
+        self.interval = interval
+        self.results: list[PingResult] = []
+        self.running = True
+        
+        # Statistics tracking
+        self.total_pings = 0
+        self.successful_pings = 0
+        self.failed_pings = 0
+        
+    def signal_handler(self, signum: int, frame) -> None:
+        """Handle interrupt signals gracefully."""
+        print(f"\n\nReceived signal {signum}. Shutting down...")
+        self.running = False
+        self.print_summary()
+        sys.exit(0)
+        
+    def ping_once(self) -> PingResult:
+        """
+        Execute single ping command and parse result.
+        
+        Returns:
+            PingResult containing success status and latency
+        """
+        try:
+            # Use macOS-optimized ping command
+            # -c 1: send only one packet
+            # -W 3000: wait max 3 seconds for response
+            # -q: quiet mode (less output)
+            result = subprocess.run(
+                ["ping", "-c", "1", "-W", "3000", "-q", self.host],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            
+            if result.returncode == 0:
+                # Parse latency from ping output
+                # Look for "round-trip min/avg/max/stddev = " line
+                for line in result.stdout.split("\n"):
+                    if "round-trip" in line and "=" in line:
+                        # Extract avg latency (second value)
+                        stats_part = line.split("=")[1].strip()
+                        latencies = stats_part.split("/")
+                        if len(latencies) >= 2:
+                            avg_latency = float(latencies[1])
+                            return PingResult(True, avg_latency, datetime.now())
+                
+                # Fallback: ping succeeded but couldn't parse latency
+                return PingResult(True, None, datetime.now())
+            else:
+                return PingResult(False, None, datetime.now())
+                
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, ValueError) as e:
+            print(f"Ping error: {e}")
+            return PingResult(False, None, datetime.now())
+    
+    def update_statistics(self, result: PingResult) -> None:
+        """Update running statistics with new ping result."""
+        self.total_pings += 1
+        self.results.append(result)
+        
+        if result.success:
+            self.successful_pings += 1
+        else:
+            self.failed_pings += 1
+            
+        # Keep only last 100 results for memory efficiency
+        if len(self.results) > 100:
+            self.results.pop(0)
+    
+    def get_packet_loss_percentage(self) -> float:
+        """Calculate packet loss percentage."""
+        if self.total_pings == 0:
+            return 0.0
+        return (self.failed_pings / self.total_pings) * 100
+    
+    def get_latency_stats(self) -> dict[str, float]:
+        """Calculate latency statistics from recent successful pings."""
+        successful_latencies = [
+            r.latency for r in self.results 
+            if r.success and r.latency is not None
+        ]
+        
+        if not successful_latencies:
+            return {"min": 0.0, "avg": 0.0, "max": 0.0, "stddev": 0.0}
+        
+        return {
+            "min": min(successful_latencies),
+            "avg": statistics.mean(successful_latencies),
+            "max": max(successful_latencies),
+            "stddev": statistics.stdev(successful_latencies) if len(successful_latencies) > 1 else 0.0
+        }
+    
+    def print_status(self, result: PingResult) -> None:
+        """Print current connection status."""
+        timestamp = result.timestamp.strftime("%H:%M:%S")
+        packet_loss = self.get_packet_loss_percentage()
+        latency_stats = self.get_latency_stats()
+        
+        if result.success:
+            latency_str = f"{result.latency:.1f}ms" if result.latency else "N/A"
+            status = f"✓ CONNECTED"
+            color_code = "\033[92m"  # Green
+        else:
+            latency_str = "TIMEOUT"
+            status = f"✗ FAILED"
+            color_code = "\033[91m"  # Red
+        
+        reset_code = "\033[0m"  # Reset color
+        
+        print(f"{timestamp} | {color_code}{status}{reset_code} | "
+              f"Latency: {latency_str} | "
+              f"Loss: {packet_loss:.1f}% | "
+              f"Avg: {latency_stats['avg']:.1f}ms | "
+              f"Pings: {self.total_pings}")
+    
+    def print_summary(self) -> None:
+        """Print final statistics summary."""
+        if self.total_pings == 0:
+            print("No pings completed.")
+            return
+            
+        packet_loss = self.get_packet_loss_percentage()
+        latency_stats = self.get_latency_stats()
+        
+        print(f"\n{'='*60}")
+        print(f"CONNECTION QUALITY SUMMARY")
+        print(f"{'='*60}")
+        print(f"Target Host: {self.host}")
+        print(f"Total Pings: {self.total_pings}")
+        print(f"Successful: {self.successful_pings}")
+        print(f"Failed: {self.failed_pings}")
+        print(f"Packet Loss: {packet_loss:.1f}%")
+        
+        if self.successful_pings > 0:
+            print(f"\nLatency Statistics:")
+            print(f"  Minimum: {latency_stats['min']:.1f}ms")
+            print(f"  Average: {latency_stats['avg']:.1f}ms")
+            print(f"  Maximum: {latency_stats['max']:.1f}ms")
+            print(f"  Std Dev: {latency_stats['stddev']:.1f}ms")
+        
+        # Connection quality assessment
+        if packet_loss == 0 and latency_stats['avg'] < 50:
+            quality = "EXCELLENT"
+        elif packet_loss < 1 and latency_stats['avg'] < 100:
+            quality = "GOOD"
+        elif packet_loss < 5 and latency_stats['avg'] < 200:
+            quality = "FAIR"
+        else:
+            quality = "POOR"
+            
+        print(f"\nOverall Quality: {quality}")
+        print(f"{'='*60}")
+    
+    def run(self) -> None:
+        """Main monitoring loop."""
+        # Set up signal handlers for graceful shutdown
+        signal.signal(signal.SIGINT, self.signal_handler)
+        signal.signal(signal.SIGTERM, self.signal_handler)
+        
+        print(f"Starting internet connection monitor...")
+        print(f"Target: {self.host}")
+        print(f"Ping interval: {self.interval} seconds")
+        print(f"Press Ctrl+C to stop and show summary\n")
+        
+        try:
+            while self.running:
+                result = self.ping_once()
+                self.update_statistics(result)
+                self.print_status(result)
+                
+                if self.running:  # Check if still running before sleeping
+                    time.sleep(self.interval)
+                    
+        except KeyboardInterrupt:
+            self.signal_handler(signal.SIGINT, None)
+
+
+def main() -> None:
+    """Main entry point."""
+    import argparse
+    
+    parser = argparse.ArgumentParser(
+        description="Monitor internet connection quality continuously",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  check_internet                    # Use defaults (8.8.8.8, 5s interval)
+  check_internet -t 1.1.1.1        # Use Cloudflare DNS
+  check_internet -i 10             # Ping every 10 seconds
+  check_internet -t 8.8.8.8 -i 3   # Custom host and interval
+        """
+    )
+    
+    parser.add_argument(
+        "-t", "--host",
+        default="8.8.8.8",
+        help="target host to ping (default: 8.8.8.8)"
+    )
+    
+    parser.add_argument(
+        "-i", "--interval",
+        type=int,
+        default=5,
+        help="seconds between pings (default: 5)"
+    )
+    
+    args = parser.parse_args()
+    
+    # Validate interval
+    if args.interval < 1:
+        print("Error: interval must be at least 1 second")
+        sys.exit(1)
+    
+    monitor = ConnectionMonitor(host=args.host, interval=args.interval)
+    monitor.run()
+
+
+if __name__ == "__main__":
+    main()
+

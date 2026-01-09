@@ -42,6 +42,7 @@
           home-manager.nixosModules.home-manager
           {
             home-manager.users.gena = import ./home/gena.nix;
+            home-manager.extraSpecialArgs = { isLTWorkDevice = false; };
             home-manager.backupFileExtension = "hm-bak";
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -58,13 +59,18 @@
         modules = [
           determinate.darwinModules.default
           ./hosts/workmbp/configuration.nix
-          # home-manager-darwin.darwinModules.home-manager
-          # {
-          #   home-manager.users.gena = import ./home/gena.nix;
-          #   home-manager.backupFileExtension = "hm-bak";
-          #   home-manager.useGlobalPkgs = true;
-          #   home-manager.useUserPackages = true;
-          # }
+          home-manager-darwin.darwinModules.home-manager
+          {
+            home-manager.users.gena = import ./home/gena.nix;
+            home-manager.extraSpecialArgs = { isLTWorkDevice = true; };
+            home-manager.backupFileExtension = "hm-bak";
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            users.users.gena = {
+              name = "gena";
+              home = "/Users/gena";
+            };
+          }
         ];
       };
     };
