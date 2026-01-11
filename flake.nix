@@ -4,6 +4,10 @@
   inputs = {
     # NixOS: stable branch
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -32,7 +36,7 @@
     determinate,
     ...
   } @ inputs: {
-    # NixOS configuration
+    # NixOS configurations
     nixosConfigurations = {
       nixos = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -49,9 +53,27 @@
           }
         ];
       };
+
+      nixos-hyperland = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/nixos-hyperland/hardware-configuration.nix
+          ./hosts/nixos-hyperland/configuration.nix
+          # Import DankMaterialShell official flake module
+          inputs.dms.nixosModules.dankMaterialShell
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.gena = import ./home/gena.nix;
+            home-manager.extraSpecialArgs = { isLTWorkDevice = false; };
+            home-manager.backupFileExtension = "hm-bak";
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+        ];
+      };
     };
 
-    # macOS/Darwin configuration
+    # macOS/Darwin configurations
     darwinConfigurations = {
       workmbp = nix-darwin.lib.darwinSystem {
         system = "aarch64-darwin";
@@ -71,21 +93,6 @@
               home = "/Users/gena";
             };
           }
-        ];
-      };  
-
-      nixos-hyperland = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux"; 
-        modules = [
-          ./hosts/nixos-hyperland/hardware-configuration.nix
-          ./hosts/nixos-hyperland/configuration.nix
-          home-manager.nixosModules.home-manager
-         {
-           home-manager.users.gena = import ./home/gena.nix;
-           home-manager.backupFileExtension = "hm-bak";
-           home-manager.useGlobalPkgs = true;
-           home-manager.useUserPackages = true;
-         }
         ];
       };
     };

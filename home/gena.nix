@@ -11,6 +11,7 @@ in
   # Packages (common + optional per-OS additions)
   home.packages = lib.mkMerge [
     (with pkgs; [
+      nixfmt-rfc-style
       git
       ripgrep
       fd
@@ -30,6 +31,7 @@ in
       coreutils
     ]))
     (lib.mkIf isLinux (with pkgs; [
+      nodejs_22
       # Linux-only user tools
     ]))
   ];
@@ -42,6 +44,7 @@ in
   # Default env; can be overridden by shell init logic below
   home.sessionVariables = {
     PAGER = "less -FR";
+    NPM_CONFIG_PREFIX = "$HOME/.local";
   };
 
   # Add ~/.local/bin to PATH
@@ -74,7 +77,7 @@ in
       '')
 
       # Rest of init content at default priority
-      ''
+      '' 
         # Load p10k config (XDG style)
         if [[ -f "${config.xdg.configHome}/p10k/p10k.zsh" ]]; then
           source "${config.xdg.configHome}/p10k/p10k.zsh"
@@ -181,12 +184,6 @@ in
     # optional
     enableZshIntegration = true;
     enableBashIntegration = true;
-  };
-  
-  # ---- SSH ----
-  programs.ssh = {
-    enable = true;
-    enableDefaultConfig = true;
   };
 
   # ---- Keep ~ tidy by storing configs in .config ----

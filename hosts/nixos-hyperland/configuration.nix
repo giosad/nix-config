@@ -105,6 +105,7 @@
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
+    nixfmt-rfc-style
     vscode
     gedit
     git
@@ -122,6 +123,10 @@
 
   
   services.getty.autologinUser = "gena";
+
+  # DankMaterialShell module imported via inputs.dms in flake.nix.
+  programs.dankMaterialShell.enable = true;
+
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
