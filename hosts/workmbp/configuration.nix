@@ -52,8 +52,9 @@
     };
   };
 
+  # (SentinelOne blocks nix-managed installation) 
   # Karabiner Elements: config managed by home-manager, app installed manually
-  # (SentinelOne blocks nix-managed installation)
+  # brew install --cask karabiner-elements
   
   # Disable PAM management (SIP prevents modifying /etc/pam.d/)
   security.pam.services.sudo_local.enable = false;
