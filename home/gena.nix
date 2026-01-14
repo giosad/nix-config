@@ -11,7 +11,6 @@ in
   # Packages (common + optional per-OS additions)
   home.packages = lib.mkMerge [
     (with pkgs; [
-      nixfmt-rfc-style
       git
       ripgrep
       fd
@@ -25,6 +24,7 @@ in
       tree
       nnn
       ncdu
+      tmux
     ])
     (lib.mkIf isDarwin (with pkgs; [
       # macOS-only CLI tools if you want them
@@ -83,6 +83,9 @@ in
           source "${config.xdg.configHome}/p10k/p10k.zsh"
         fi
 
+        # Disable magic functions to avoid [[200 markers on pasted text
+        DISABLE_MAGIC_FUNCTIONS=true
+        
         # EDITOR/VISUAL selection
         ${if isDarwin then ''
           if command -v cot &>/dev/null; then
