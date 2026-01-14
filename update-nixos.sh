@@ -1,3 +1,3 @@
 #!/usr/bin/env zsh
 set -euo pipefail
-sudo nixos-rebuild switch --flake /home/gena/nix-config#nixos
+sudo nixos-rebuild switch --flake /home/gena/nix-config#nixos-hyperland

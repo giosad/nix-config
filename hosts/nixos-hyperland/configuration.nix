@@ -89,44 +89,44 @@
     description = "gena";
     extraGroups = [ "networkmanager" "wheel" "docker"];
     packages = with pkgs; [
-    #  thunderbird
+      #  thunderbird
     ];
     shell = pkgs.zsh;
   };
 
   # Install firefox.
   programs.firefox.enable = true;
-  programs.zsh.enable = true; 
+  programs.zsh.enable = true;
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
-    nixfmt-rfc-style
+    #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    #  wget
+    nixfmt-rfc-style # allows for format nix files with vscode
     vscode
     gedit
     git
-    tealdeer
+    tealdeer # tldr
     xclip
     bat
-    ghostty
     tree
     neofetch
-    foot
-    kitty
-    hyprpaper
-    waybar
+    kitty # terminal for hyprland
+    cloudflared # cloudflare tunnel client
+    rofi # menu for hyprland
+    cliphist # clipboard manager for hyprland
+    matugen # colors generation for dank material shell
   ];
-
   
   services.getty.autologinUser = "gena";
-
-  # DankMaterialShell module imported via inputs.dms in flake.nix.
-  programs.dankMaterialShell.enable = true;
-
+  services.tailscale.enable = true;
+  programs.dankMaterialShell = {
+    enable = true;
+    enableDynamicTheming = true;
+  };
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
