@@ -59,7 +59,7 @@ in
     dotDir = config.home.homeDirectory;
 
     shellAliases = {
-      ls = "${if isDarwin then "gls" else "ls"} -Fh --color=auto --group-directories-first";
+      ls = "ls -Fh --color=auto --group-directories-first";
       ll = "ls -l";
       la = "ls -la";
       gs = "git status";
