@@ -8,6 +8,10 @@
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dgop = {
+      url = "github:AvengeMedia/dgop";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -59,8 +63,11 @@
         modules = [
           ./hosts/nixos-hyperland/hardware-configuration.nix
           ./hosts/nixos-hyperland/configuration.nix
-          # Import DankMaterialShell official flake module
-          inputs.dms.nixosModules.dankMaterialShell
+          # Import dank-material-shell official flake module
+          inputs.dms.nixosModules.dank-material-shell
+          {
+            programs."dank-material-shell".dgop.package = inputs.dgop.packages."x86_64-linux".dgop;
+          }
           home-manager.nixosModules.home-manager
           {
             home-manager.users.gena = import ./home/gena.nix;

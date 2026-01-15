@@ -123,7 +123,8 @@
   
   services.getty.autologinUser = "gena";
   services.tailscale.enable = true;
-  programs.dankMaterialShell = {
+  
+  programs.dank-material-shell = {
     enable = true;
     enableDynamicTheming = true;
   };
