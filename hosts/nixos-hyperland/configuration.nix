@@ -128,6 +128,7 @@
     enable = true;
     enableDynamicTheming = true;
   };
+
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;

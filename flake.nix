@@ -49,6 +49,7 @@
           ./hosts/nixos/configuration.nix
           home-manager.nixosModules.home-manager
           {
+            nix.registry.nixpkgs.flake = nixpkgs;
             home-manager.users.gena = import ./home/gena.nix;
             home-manager.extraSpecialArgs = { isLTWorkDevice = false; };
             home-manager.backupFileExtension = "hm-bak";
@@ -63,13 +64,15 @@
         modules = [
           ./hosts/nixos-hyperland/hardware-configuration.nix
           ./hosts/nixos-hyperland/configuration.nix
-          # Import dank-material-shell official flake module
           inputs.dms.nixosModules.dank-material-shell
           {
-            programs."dank-material-shell".dgop.package = inputs.dgop.packages."x86_64-linux".dgop;
+            # ensure we use DGOP from its flake input
+            programs.dank-material-shell.dgop.package = inputs.dgop.packages."x86_64-linux".dgop;
           }
+          # Import dank-material-shell official flake module
           home-manager.nixosModules.home-manager
           {
+            nix.registry.nixpkgs.flake = nixpkgs;
             home-manager.users.gena = import ./home/gena.nix;
             home-manager.extraSpecialArgs = { isLTWorkDevice = false; };
             home-manager.backupFileExtension = "hm-bak";
@@ -90,6 +93,7 @@
           ./hosts/workmbp/configuration.nix
           home-manager-darwin.darwinModules.home-manager
           {
+            nix.registry.nixpkgs.flake = nixpkgs-darwin;
             home-manager.users.gena = import ./home/gena.nix;
             home-manager.extraSpecialArgs = { isLTWorkDevice = true; };
             home-manager.backupFileExtension = "hm-bak";
