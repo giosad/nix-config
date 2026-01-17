@@ -78,6 +78,10 @@ fi
 printf "Operating on profile: \t %s\n" "$profile"
 printf "Parameters: \t\t Keep Gens = %s \t Keep Days = %s\n\n" "$keepGens" "$keepDays"
 
+printf "Existing generations (newest first):\n"
+nix-env --list-generations -p "$profile" | tac
+printf "\n"
+
 ## Query nix-env
 # Capture output, strip leading/trailing whitespace, squeeze tabs/spaces
 IFS=$'\n' nixGens=( $(nix-env --list-generations -p "$profile" | sed 's:^\s*::; s:\s*$::' | tr '\t' ' ' | tr -s ' ') )
@@ -90,6 +94,7 @@ fi
 timeNow=$(date +%s)
 currentGen=0
 declare -a gensToDelete
+gensToDelete=()
 
 # First pass: Identify current generation
 for i in "${nixGens[@]}"; do
@@ -137,7 +142,7 @@ for i in "${nixGens[@]}"; do
     # 1. Any generation newer than keepDays.
     # 2. The last keepGens generations, regardless of age.
     # Note: If genNumber > currentGen (future/rollback), genDiff is negative, so it won't be deleted.
-    if [[ $genDaysOld -gt $keepDays ]] && [[ $genDiff -ge $keepGens ]]; then
+    if [[ $genDaysOld -ge $keepDays ]] && [[ $genDiff -ge $keepGens ]]; then
         gensToDelete+=("$genNumber")
         # verbose output optional:
         # printf "Marking gen %s: %s days old, %s gens behind.\n" "$genNumber" "$genDaysOld" "$genDiff"
