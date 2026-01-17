@@ -2,9 +2,9 @@
 
 # Check if target is provided
 if [ -z "$1" ]; then
-    echo "Usage: $0 <ip-address or hostname>"
-    echo "Example: $0 192.168.1.100"
-    echo "Example: $0 pushkin.local"
+    echo "Usage: $0 <[user@]host>"
+    echo "Example: $0 root@192.168.1.100"
+    echo "Example: $0 gena@pushkin.local"
     exit 1
 fi
 
@@ -20,5 +20,5 @@ fi
 
 # Run nixos-anywhere
 # --flake .#pushkin-nixos: points to the configuration defined in flake.nix
-# root@$TARGET: the SSH destination
-nix run github:nix-community/nixos-anywhere -- --flake .#pushkin-nixos "root@$TARGET"
+# $TARGET: the SSH destination (e.g. user@host)
+nix run github:nix-community/nixos-anywhere -- --flake .#pushkin-nixos "$TARGET"
