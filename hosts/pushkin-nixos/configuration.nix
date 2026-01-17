@@ -49,7 +49,7 @@
   users.users.gena = {
     isNormalUser = true;
     description = "gena";
-    initialPassword = "1234";
+    hashedPassword = "$6$jLMks7p8NoIbC/fT$ZjQc5OQ684oxg0uzPluq08xtzTfLB3d3uNhGae3liO06xV2EkOE6g2l9wJqXwg5sHyO2lj24j49wDpnE7u/JH0";
     extraGroups = [ "networkmanager" "wheel" "docker"];
     packages = with pkgs; [];
     shell = pkgs.zsh;
