@@ -13,4 +13,16 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   # virtualisation.hypervGuest.enable = true;
+
+  fileSystems."/mnt/ssd" = {
+    device = "/dev/disk/by-id/ata-SanDisk_SSD_PLUS_1000GB_214401A00277-part1";
+    fsType = "auto";
+    options = [ "nofail" ];
+  };
+
+  fileSystems."/mnt/hdd" = {
+    device = "/dev/mapper/ubuntu--vg-home--lv";
+    fsType = "auto";
+    options = [ "nofail" ];
+  };
 }
