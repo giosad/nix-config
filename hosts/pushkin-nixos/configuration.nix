@@ -72,7 +72,6 @@
     neofetch
     htop
     docker-compose
-    kitty # Required for xterm-kitty terminfo
   ];
 
   services.avahi = {
