@@ -49,6 +49,7 @@
   users.users.gena = {
     isNormalUser = true;
     description = "gena";
+    initialPassword = "password";
     extraGroups = [ "networkmanager" "wheel" "docker"];
     packages = with pkgs; [];
     shell = pkgs.zsh;
