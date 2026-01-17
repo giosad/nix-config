@@ -17,6 +17,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # macOS/Darwin: unstable (better darwin support)
     nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin = {
@@ -38,15 +43,16 @@
     nix-darwin,
     home-manager-darwin,
     determinate,
+    disko,
     ...
   } @ inputs: {
     # NixOS configurations
     nixosConfigurations = {
-      nixos = nixpkgs.lib.nixosSystem {
+      nixos-desktop = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          ./hosts/nixos/hardware-configuration.nix
-          ./hosts/nixos/configuration.nix
+          ./hosts/nixos-desktop/hardware-configuration.nix
+          ./hosts/nixos-desktop/configuration.nix
           home-manager.nixosModules.home-manager
           {
             nix.registry.nixpkgs.flake = nixpkgs;
@@ -59,17 +65,36 @@
         ];
       };
 
-      nixos-hyperland = nixpkgs.lib.nixosSystem {
+      nixos-hypr-desktop = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          ./hosts/nixos-hyperland/hardware-configuration.nix
-          ./hosts/nixos-hyperland/configuration.nix
+          ./hosts/nixos-hypr-desktop/hardware-configuration.nix
+          ./hosts/nixos-hypr-desktop/configuration.nix
           inputs.dms.nixosModules.dank-material-shell
           {
             # ensure we use DGOP from its flake input
             programs.dank-material-shell.dgop.package = inputs.dgop.packages."x86_64-linux".dgop;
           }
           # Import dank-material-shell official flake module
+          home-manager.nixosModules.home-manager
+          {
+            nix.registry.nixpkgs.flake = nixpkgs;
+            home-manager.users.gena = import ./home/gena.nix;
+            home-manager.extraSpecialArgs = { isLTWorkDevice = false; };
+            home-manager.backupFileExtension = "hm-bak";
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+        ];
+      };
+
+      pushkin-nixos = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          ./hosts/pushkin-nixos/disk-config.nix
+          ./hosts/pushkin-nixos/hardware-configuration.nix
+          ./hosts/pushkin-nixos/configuration.nix
           home-manager.nixosModules.home-manager
           {
             nix.registry.nixpkgs.flake = nixpkgs;
