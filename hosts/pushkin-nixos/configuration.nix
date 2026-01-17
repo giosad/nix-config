@@ -55,6 +55,8 @@
     shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [
       # Add your public SSH keys here
+      # from 1password
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPJdvlTfuVlXpe1MEmzNMhZM9lsvKFBxBIKjvL+PPZVr"
     ];
   };
 
@@ -91,7 +93,7 @@
   services.openssh = {
     enable = true;
     settings = {
-        PasswordAuthentication = true; # Disable this if you want only key-based access
+        PasswordAuthentication = false;
         PermitRootLogin = "no";
     };
   };
