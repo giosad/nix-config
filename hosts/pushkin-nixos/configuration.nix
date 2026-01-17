@@ -58,7 +58,10 @@
     ];
   };
 
+  programs.nix-ld.enable = true;
+  
   programs.zsh.enable = true; 
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
