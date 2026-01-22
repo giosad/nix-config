@@ -45,11 +45,13 @@ in
   home.sessionVariables = {
     PAGER = "less -FR";
     NPM_CONFIG_PREFIX = "$HOME/.local";
+    PNPM_HOME = "$HOME/.local/share/pnpm";
   };
 
   # Add ~/.local/bin to PATH
   home.sessionPath = [
     "$HOME/.local/bin"
+    "$PNPM_HOME"
   ];
 
   # ---- Shells ----
@@ -199,15 +201,23 @@ in
     };
   };
 
-  # ---- macOS-only scripts ----
-  home.file = lib.mkIf isDarwin {
-    ".local/bin/say_ready" = {
-      source = ./say_ready;
-      executable = true;
-    };
-    ".local/bin/check_internet" = {
-      source = ./check_internet;
-      executable = true;
-    };
-  };
+  # ---- Scripts ----
+  home.file = lib.mkMerge [
+    {
+      ".local/bin/zshrc-diff-run" = {
+        source = ./zshrc-diff-run;
+        executable = true;
+      };
+    }
+    (lib.mkIf isDarwin {
+      ".local/bin/say_ready" = {
+        source = ./say_ready;
+        executable = true;
+      };
+      ".local/bin/check_internet" = {
+        source = ./check_internet;
+        executable = true;
+      };
+    })
+  ];
 }

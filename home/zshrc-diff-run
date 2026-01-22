@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ "$#" -eq 0 ]; then
+  echo "Usage: zshrc-diff-run <command> [args...]" >&2
+  exit 2
+fi
+
+orig_zshrc="$HOME/.zshrc"
+tmp_dir="$(mktemp -d)"
+tmp_zshrc="$tmp_dir/.zshrc"
+
+cleanup() {
+  rm -rf "$tmp_dir"
+}
+trap cleanup EXIT
+
+if [ -f "$orig_zshrc" ]; then
+  cp "$orig_zshrc" "$tmp_zshrc"
+else
+  : > "$tmp_zshrc"
+fi
+chmod u+w "$tmp_zshrc"
+
+cmd_status=0
+diff_status=0
+
+set +e
+env ZDOTDIR="$tmp_dir" "$@"
+cmd_status=$?
+
+if [ -f "$orig_zshrc" ]; then
+  diff -u --label "$orig_zshrc" --label "$tmp_zshrc" "$orig_zshrc" "$tmp_zshrc"
+  diff_status=$?
+else
+  diff -u --label "/dev/null" --label "$tmp_zshrc" /dev/null "$tmp_zshrc"
+  diff_status=$?
+fi
+set -e
+
+if [ "$diff_status" -eq 0 ]; then
+  echo "No changes to .zshrc"
+elif [ "$diff_status" -ne 1 ]; then
+  echo "Error: diff failed" >&2
+  exit 2
+fi
+
+exit "$cmd_status"
