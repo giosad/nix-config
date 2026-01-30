@@ -44,6 +44,25 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
   virtualisation.docker.enable = true;
+
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+    extraPackages = with pkgs; [ nvidia-vaapi-driver libva ];
+    extraPackages32 = with pkgs.pkgsi686Linux; [ libva ];
+  };
+
+  hardware.nvidia = {
+    package = config.boot.kernelPackages.nvidiaPackages.production;
+    modesetting.enable = true;
+    powerManagement.enable = true;
+    nvidiaSettings = true;
+    open = false;
+  };
+
+  hardware.nvidia-container-toolkit.enable = true;
+
+  services.xserver.videoDrivers = [ "nvidia" ];
   
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.gena = {
@@ -77,6 +96,10 @@
     neofetch
     htop
     docker-compose
+    pciutils
+    libva-utils
+    vdpauinfo
+    nvtopPackages.nvidia
   ];
 
   services.avahi = {
@@ -108,6 +131,17 @@
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+
+  services.ollama = {
+    enable = true;
+    acceleration = "cuda";        # or "rocm"/"metal"/"cpu"
+    host = "0.0.0.0";
+    port = 32000;
+    environmentVariables = {
+      OLLAMA_KEEP_ALIVE = "24h";
+    };
+  };
+  networking.firewall.allowedTCPPorts = [ 32000 ];
 
   system.stateVersion = "25.11"; 
 }
