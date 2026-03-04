@@ -7,35 +7,44 @@ if [ "$#" -eq 0 ]; then
 fi
 
 orig_zshrc="$HOME/.zshrc"
-tmp_dir="$(mktemp -d)"
-tmp_zshrc="$tmp_dir/.zshrc"
+backup_dir="$(mktemp -d)"
+backup_file="$backup_dir/.zshrc.backup"
+backup_link="$backup_dir/.zshrc.link"
 
 cleanup() {
-  rm -rf "$tmp_dir"
+  # Restore original state
+  if [ -f "$backup_link" ]; then
+    ln -sf "$(cat "$backup_link")" "$orig_zshrc"
+  elif [ -f "$backup_file" ]; then
+    cp "$backup_file" "$orig_zshrc"
+  fi
+  rm -rf "$backup_dir"
 }
 trap cleanup EXIT
 
-if [ -f "$orig_zshrc" ]; then
-  cp "$orig_zshrc" "$tmp_zshrc"
+# Save original state and make writable
+if [ -L "$orig_zshrc" ]; then
+  readlink "$orig_zshrc" > "$backup_link"
+  cp "$orig_zshrc" "$backup_file"
+  rm "$orig_zshrc"
+  cp "$backup_file" "$orig_zshrc"
+  chmod u+w "$orig_zshrc"
+elif [ -f "$orig_zshrc" ]; then
+  cp "$orig_zshrc" "$backup_file"
+  chmod u+w "$orig_zshrc"
 else
-  : > "$tmp_zshrc"
+  : > "$backup_file"
 fi
-chmod u+w "$tmp_zshrc"
 
 cmd_status=0
 diff_status=0
 
 set +e
-env ZDOTDIR="$tmp_dir" "$@"
+"$@"
 cmd_status=$?
 
-if [ -f "$orig_zshrc" ]; then
-  diff -u --label "$orig_zshrc" --label "$tmp_zshrc" "$orig_zshrc" "$tmp_zshrc"
-  diff_status=$?
-else
-  diff -u --label "/dev/null" --label "$tmp_zshrc" /dev/null "$tmp_zshrc"
-  diff_status=$?
-fi
+diff -u --label "original" --label "modified" "$backup_file" "$orig_zshrc"
+diff_status=$?
 set -e
 
 if [ "$diff_status" -eq 0 ]; then
