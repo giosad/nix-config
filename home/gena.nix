@@ -25,6 +25,7 @@ in
       nnn
       ncdu
       tmux
+      gitstatus   # used by powerlevel10k via $GITSTATUS_DAEMON (avoids p10k's broken auto-download path)
     ])
     (lib.mkIf isDarwin (with pkgs; [
       # macOS-only CLI tools if you want them
@@ -46,6 +47,12 @@ in
     PAGER = "less -FR";
     NPM_CONFIG_PREFIX = "$HOME/.local";
     PNPM_HOME = "$HOME/.local/share/pnpm";
+
+    # Point powerlevel10k at the nix-provided gitstatusd (v1.5.5).
+    # p10k's auto-download path is broken: its build.info wants v1.5.5 but
+    # install.info still pins all platforms to v1.5.4, and there's no v1.5.5
+    # binary release upstream — every shell start fails the version check.
+    GITSTATUS_DAEMON = "${pkgs.gitstatus}/bin/gitstatusd";
   };
 
   # Add ~/.local/bin to PATH
