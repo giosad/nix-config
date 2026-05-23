@@ -123,7 +123,24 @@ in
             echo "No virtual environment found."
         }
 
-        if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
+        # Completion polish (case-insensitive, colored). fzf-tab honors these.
+        zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+        zstyle ':completion:*' list-colors "''${(s.:.)LS_COLORS}"
+
+        # Esc-Esc to prepend/toggle sudo on the current line
+        sudo-command-line() {
+          [[ -z $BUFFER ]] && zle up-history
+          if [[ $BUFFER == sudo\ * ]]; then
+            LBUFFER="''${LBUFFER#sudo }"
+          else
+            LBUFFER="sudo $LBUFFER"
+          fi
+        }
+        zle -N sudo-command-line
+        bindkey -M emacs '\e\e' sudo-command-line
+        bindkey -M viins '\e\e' sudo-command-line
+        bindkey -M vicmd '\e\e' sudo-command-line
+
       ''
     ];
 
@@ -131,13 +148,6 @@ in
       enable = true;
       useFriendlyNames = true;
       plugins = [
-        "getantidote/use-omz"
-        "ohmyzsh/ohmyzsh path:lib"
-        "ohmyzsh/ohmyzsh path:plugins/sudo"
-        "ohmyzsh/ohmyzsh path:plugins/docker"
-        "ohmyzsh/ohmyzsh path:plugins/kubectl"
-        "ohmyzsh/ohmyzsh path:plugins/uv"
-
         "romkatv/powerlevel10k"
         "rupa/z"
         "mrjohannchang/fz.sh"

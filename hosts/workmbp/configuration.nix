@@ -11,7 +11,16 @@
   ];
 
   # Use system zsh (macOS default)
-  programs.zsh.enable = true;
+  # Strip /etc/zshrc down — home-manager's ~/.zshrc handles compinit and the
+  # prompt (powerlevel10k). Leaving the defaults on means promptinit, compinit,
+  # and bashcompinit all run before ~/.zshrc, adding ~2.5s to interactive
+  # startup before doing anything we keep.
+  programs.zsh = {
+    enable = true;
+    enableCompletion = false;
+    enableBashCompletion = false;
+    promptInit = "";
+  };
 
   # Set Git commit hash for darwin-version
   system.configurationRevision = self.rev or self.dirtyRev or null;
