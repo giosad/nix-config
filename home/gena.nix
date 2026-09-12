@@ -58,6 +58,11 @@ in
     # stdout when Homebrew is not on PATH yet, which breaks gcloud.
     CLOUDSDK_PYTHON = "/opt/homebrew/bin/python3.12";
     CLOUDSDK_PYTHON_SITEPACKAGES = "1";
+    HOMEBREW_PREFIX = "/opt/homebrew";
+    HOMEBREW_CELLAR = "/opt/homebrew/Cellar";
+    HOMEBREW_REPOSITORY = "/opt/homebrew";
+  } // lib.optionalAttrs isLTWorkDevice {
+    GOOGLE_CLOUD_PROJECT = "facetune-engineering";
   };
 
   # Add ~/.local/bin to PATH
@@ -156,6 +161,21 @@ in
         bindkey -M viins '\e\e' sudo-command-line
         bindkey -M vicmd '\e\e' sudo-command-line
 
+        ${lib.optionalString isLTWorkDevice ''
+        # gcloud: load PATH eagerly (~10ms), defer completion (~250ms)
+        # until after the first prompt. Standalone SDK, not Homebrew gcloud.
+        if [ -f "${config.home.homeDirectory}/google-cloud-sdk/path.zsh.inc" ]; then
+          . "${config.home.homeDirectory}/google-cloud-sdk/path.zsh.inc"
+        fi
+        _gcloud_load_completion() {
+          [ -f "${config.home.homeDirectory}/google-cloud-sdk/completion.zsh.inc" ] && \
+            . "${config.home.homeDirectory}/google-cloud-sdk/completion.zsh.inc"
+          add-zsh-hook -d precmd _gcloud_load_completion
+          unfunction _gcloud_load_completion
+        }
+        autoload -Uz add-zsh-hook
+        add-zsh-hook precmd _gcloud_load_completion
+        ''}
       ''
     ];
 
