@@ -53,12 +53,20 @@ in
     # install.info still pins all platforms to v1.5.4, and there's no v1.5.5
     # binary release upstream — every shell start fails the version check.
     GITSTATUS_DAEMON = "${pkgs.gitstatus}/bin/gitstatusd";
+  } // lib.optionalAttrs isDarwin {
+    # Absolute path: zsh `which python3.12` prints "python3.12 not found" to
+    # stdout when Homebrew is not on PATH yet, which breaks gcloud.
+    CLOUDSDK_PYTHON = "/opt/homebrew/bin/python3.12";
+    CLOUDSDK_PYTHON_SITEPACKAGES = "1";
   };
 
   # Add ~/.local/bin to PATH
   home.sessionPath = [
     "$HOME/.local/bin"
     "$PNPM_HOME"
+  ] ++ lib.optionals isDarwin [
+    "/opt/homebrew/bin"
+    "/opt/homebrew/sbin"
   ];
 
   # ---- Shells ----
