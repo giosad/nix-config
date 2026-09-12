@@ -52,7 +52,7 @@
 
   # # Enable the Budgie Desktop environment.
   # services.xserver.displayManager.lightdm.enable = true;
-  # services.xserver.desktopManager.budgie.enable = true;
+  # services.desktopManager.budgie.enable = true;
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
   # Configure keymap in X11
@@ -105,7 +105,7 @@
   environment.systemPackages = with pkgs; [
     #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     #  wget
-    nixfmt-rfc-style # allows for format nix files with vscode
+    nixfmt # format nix files with vscode
     vscode
     gedit
     git
@@ -113,7 +113,7 @@
     xclip
     bat
     tree
-    neofetch
+    fastfetch
     kitty # terminal for hyprland
     cloudflared # cloudflare tunnel client
     rofi # menu for hyprland

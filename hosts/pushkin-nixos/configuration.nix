@@ -93,7 +93,7 @@
     tealdeer
     bat
     tree
-    neofetch
+    fastfetch
     htop
     docker-compose
     pciutils
@@ -134,7 +134,7 @@
 
   services.ollama = {
     enable = true;
-    acceleration = "cuda";        # or "rocm"/"metal"/"cpu"
+    package = pkgs.ollama-cuda;
     host = "0.0.0.0";
     port = 32000;
     environmentVariables = {
