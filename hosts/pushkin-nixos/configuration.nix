@@ -143,5 +143,8 @@
   };
   networking.firewall.allowedTCPPorts = [ 32000 ];
 
+  environment.variables = {
+    OLLAMA_HOST = "127.0.0.1:32000";
+  };
   system.stateVersion = "25.11"; 
 }
