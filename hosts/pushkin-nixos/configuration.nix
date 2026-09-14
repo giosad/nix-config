@@ -85,6 +85,9 @@
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+  # GTX 1660 SUPER is compute capability 7.5; limit CUDA targets to avoid
+  # compiling a huge matrix of GPU architectures for llama.cpp/ollama-cuda.
+  nixpkgs.config.cudaCapabilities = [ "7.5" ];
 
   # List packages installed in system profile.
   environment.systemPackages = with pkgs; [
